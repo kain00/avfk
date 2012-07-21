@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jee="http://www.springframework.org/schema/jee" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+    xmlns:drools="http://drools.org/schema/drools-spring" 
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://drools.org/schema/drools-spring http://drools.org/schema/drools-spring.xsd">
+
+	<context:annotation-config />
+    <context:component-scan base-package="hu.randras.avfk"/> 
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+	<bean id="applicationContextProvider" class="hu.randras.avfk.util.SpringHelper"></bean>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath*:/conf/jdbc.properties</value>
+				<value>classpath*:/conf/application.properties</value>
+			</list>
+		</property>
+	</bean>
+
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="generateDdl" value="false" />
+				<property name="showSql" value="true" />
+				<property name="database" value="POSTGRESQL" />
+			</bean>
+		</property>
+		<property name="persistenceUnitManager">
+			<bean class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+				<property name="defaultDataSource" ref="dataSource"/>
+				<property name="persistenceXmlLocation" value="classpath*:/META-INF/persistence.xml"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+<!-- 	<jdbc:embedded-database id="dataSource" type="HSQL" /> -->
+
+	<import resource="classpath*:/WEB-INF/repository-context.xml"/>
+
+<!-- 	<import resource="security.xml"/> -->
+
+
+	<!-- Cache beállítások
+
+	<cache:annotation-driven />
+
+	<bean id="cacheManager" class="hu.appello.fwcore.cache.AplEhCacheCacheManager" p:cache-manager-ref="ehcache"/> -->
+
+	<!-- Ehcache library setup
+	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="classpath:ehcache.xml"/> -->
+	
+	<!-- Rule executor
+	<bean id="defaultRuleExecutor" class="hu.appello.fwcore.rule.DummyRuleExecutor" /> -->
+	
+	<!-- Akciók kezelése -->
+	<!--  bean id="actionManager" class="hu.appello.fwcore.process.BusinessActionManager" /--> 
+
+<!-- 	További vizsgálat szükséges: Jasper-rel összeakad, ezért kicommentezve.
+	<drools:kbase id="kbase1">
+		<drools:resources>
+			<drools:resource source="classpath:rules/UserInitRules.drl" type="DRL"/>
+		</drools:resources>
+	</drools:kbase>
+	<drools:ksession id="ksession1" type="stateless" kbase="kbase1"/>
+	 -->
+
+</beans>  
